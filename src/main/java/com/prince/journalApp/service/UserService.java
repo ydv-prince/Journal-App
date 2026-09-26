@@ -2,6 +2,7 @@ package com.prince.journalApp.service;
 
 import com.prince.journalApp.entity.User;
 import com.prince.journalApp.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class UserService {
 
     @Autowired
@@ -29,6 +31,7 @@ public class UserService {
             userRepository.save(user);
             return true;
         } catch (Exception e) {
+            log.error("Error occurred while saving user {}: {}", user.getUserName(), e.getMessage());
             return false;
         }
     }
@@ -55,5 +58,9 @@ public class UserService {
 
     public void deleteById(ObjectId id){
         userRepository.deleteById(id);
+    }
+
+    public void deleteByUserName(String userName){
+        userRepository.deleteByUserName(userName);
     }
 }
