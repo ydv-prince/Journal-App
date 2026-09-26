@@ -1,17 +1,13 @@
 package com.prince.journalApp.controller;
 
 import com.prince.journalApp.entity.User;
-import com.prince.journalApp.repository.UserRepository;
 import com.prince.journalApp.service.UserService;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -20,12 +16,24 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private UserRepository userRepository;
+    @GetMapping
+    public ResponseEntity<?> getAuthenticatedUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        User user = userService.findByUserName(userName);
+        if (user != null) {
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
     @GetMapping("/{userName}")
-    public User getUserById(@PathVariable String userName){
-        return userService.findByUserName(userName);
+    public ResponseEntity<?> getUserByName(@PathVariable String userName){
+        User user = userService.findByUserName(userName);
+        if (user != null) {
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PutMapping
@@ -46,7 +54,7 @@ public class UserController {
     public ResponseEntity<?> deleteByUserName(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
-        userRepository.deleteByUserName(userName);
+        userService.deleteByUserName(userName);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
