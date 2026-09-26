@@ -3,6 +3,7 @@ package com.prince.journalApp.service;
 import com.prince.journalApp.entity.JournalEntry;
 import com.prince.journalApp.entity.User;
 import com.prince.journalApp.repository.JournalEntryRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class JournalEntryService {
 
     @Autowired
@@ -30,7 +32,7 @@ public class JournalEntryService {
             user.getJournalEntries().add(saved);
             userService.saveUser(user);
         }catch (Exception e){
-            System.out.println(e);
+            log.error("Exception occurred while saving entry for user: {}", userName, e);
             throw new RuntimeException("Exception occurred while saving the data", e);
         }
     }
@@ -60,7 +62,7 @@ public class JournalEntryService {
                 }
             }
         } catch (Exception e) {
-            System.out.println(e);
+            log.error("Exception occurred while deleting entry {} for user: {}", id, userName, e);
             throw new RuntimeException("An error occurred while deleting the entry.", e);
         }
         return removed;
