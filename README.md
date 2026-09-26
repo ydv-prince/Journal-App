@@ -1,228 +1,198 @@
-# 📓 Journal App - Spring Boot & MongoDB REST API
+# Journal App
 
-A secure, robust RESTful Journaling API built using **Spring Boot 2.7**, **Spring Security**, and **MongoDB**. The application allows users to register, authenticate, and manage their personal journal entries with full data isolation and transaction management.
-
----
-
-## 🚀 Features
-
-- **User Authentication & Authorization**:
-  - Stateless session management with **HTTP Basic Authentication**.
-  - Passwords securely hashed using **BCrypt** with salt.
-  - Role-based access control (`USER` role assigned by default).
-- **Journal Entry Management**:
-  - Full CRUD operations (Create, Read, Update, Delete) for journal entries.
-  - User-scoped access: Users can only view, edit, or delete their own entries.
-- **MongoDB Integration**:
-  - Document-based persistence with Spring Data MongoDB.
-  - `@DBRef` relational mapping between `User` and `JournalEntry` documents.
-- **Transaction Management**:
-  - Declarative `@Transactional` support with `MongoTransactionManager` ensuring atomicity during multi-document operations (e.g., adding/removing entries and updating the user reference).
-- **Public & Management Endpoints**:
-  - Public endpoints for user registration and application health checks.
-  - User profile update and account deletion.
+A RESTful backend service for managing personal journal entries, built with Spring Boot, Spring Security, and MongoDB. The application provides secure user authentication, role-based access control, and user-isolated journal management.
 
 ---
 
-## 🛠️ Tech Stack
+## Features
+
+- **User Authentication**: HTTP Basic Authentication with BCrypt password hashing.
+- **Data Isolation**: Journal entries are associated with specific users; users can only access and manage their own entries.
+- **Database Mapping**: MongoDB document persistence using Spring Data MongoDB and `@DBRef` mapping between users and journal entries.
+- **Transaction Support**: Declarative `@Transactional` support with `MongoTransactionManager` for atomic operations across collections.
+- **RESTful Endpoints**: Clean API design for public user registration, user profile management, and journal entry CRUD operations.
+
+---
+
+## Tech Stack
 
 - **Java**: 17
 - **Framework**: Spring Boot 2.7.18
   - Spring Web
   - Spring Security
   - Spring Data MongoDB
-- **Database**: MongoDB (Local or MongoDB Atlas)
-- **Boilerplate Reduction**: Project Lombok
+- **Database**: MongoDB
+- **Utilities**: Lombok
 - **Build Tool**: Maven
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
-journalApp/
-├── src/
-│   ├── main/
-│   │   ├── java/com/prince/journalApp/
-│   │   │   ├── config/
-│   │   │   │   └── SpringSecurity.java         # Security & PasswordEncoder configuration
-│   │   │   ├── controller/
-│   │   │   │   ├── JournalEntryController.java # User-authenticated journal CRUD endpoints
-│   │   │   │   ├── PublicController.java       # Public endpoints (register, health-check)
-│   │   │   │   └── UserController.java         # User profile update & deletion
-│   │   │   ├── entity/
-│   │   │   │   ├── JournalEntry.java           # JournalEntry MongoDB document model
-│   │   │   │   └── User.java                   # User MongoDB document model
-│   │   │   ├── repository/
-│   │   │   │   ├── JournalEntryRepository.java # MongoRepository for JournalEntry
-│   │   │   │   └── UserRepository.java         # MongoRepository for User
-│   │   │   ├── service/
-│   │   │   │   ├── JournalEntryService.java    # Business logic & transactional operations for entries
-│   │   │   │   ├── UserDetailsServiceImpl.java # Custom UserDetailsService for Spring Security
-│   │   │   │   └── UserService.java            # User business logic & password encryption
-│   │   │   └── JournalAppApplication.java      # Main application class & MongoTransactionManager
-│   │   └── resources/
-│   │       └── application.properties          # MongoDB & application configuration
-│   └── test/
-│       └── java/com/prince/journalApp/
-│           └── JournalAppApplicationTests.java # Context loading tests
-├── .gitignore                                  # Git ignore rules for build artifacts & IDEs
-├── pom.xml                                     # Maven dependencies and build plugins
-└── README.md                                   # Project documentation
+src/
+├── main/
+│   ├── java/com/prince/journalApp/
+│   │   ├── config/
+│   │   │   └── SpringSecurity.java         # Security and password encoder configuration
+│   │   ├── controller/
+│   │   │   ├── PublicController.java       # Public endpoints (registration, health-check)
+│   │   │   ├── UserController.java         # User management endpoints
+│   │   │   └── JournalEntryController.java # Authenticated journal entry endpoints
+│   │   ├── entity/
+│   │   │   ├── User.java                   # User document entity
+│   │   │   └── JournalEntry.java           # JournalEntry document entity
+│   │   ├── repository/
+│   │   │   ├── UserRepository.java         # MongoDB repository for users
+│   │   │   └── JournalEntryRepository.java # MongoDB repository for journal entries
+│   │   ├── service/
+│   │   │   ├── UserService.java            # User service and password hashing
+│   │   │   ├── UserDetailsServiceImpl.java # Custom UserDetailsService implementation
+│   │   │   └── JournalEntryService.java    # Journal service with transaction handling
+│   │   └── JournalAppApplication.java      # Application entry point and transaction manager
+│   └── resources/
+│       └── application.properties          # Application and database configuration
+└── test/
+    └── java/com/prince/journalApp/
+        └── JournalAppApplicationTests.java # Context loading tests
 ```
 
 ---
 
-## 📡 API Endpoints
+## API Reference
 
-### 1. Public Endpoints (No Authentication Required)
+### Public Endpoints
 
-| Method | Endpoint | Description | Request Body | Response Code |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/public/health-check` | Application health check | *None* | `200 OK` |
-| `POST` | `/public/create-user` | Register a new user | `User` (JSON) | `201 CREATED` |
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/public/health-check` | Check service health | No |
+| `POST` | `/public/create-user` | Register a new user | No |
 
-#### Create User Request Body:
+#### Create User Payload
 ```json
 {
-  "userName": "john_doe",
-  "password": "secretPassword123"
+  "userName": "prince",
+  "password": "mypassword"
 }
 ```
 
 ---
 
-### 2. Journal Entry Endpoints (HTTP Basic Auth Required)
+### User Endpoints
 
-| Method | Endpoint | Description | Request Body | Response Code |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/journal` | Get all journal entries of authenticated user | *None* | `200 OK` / `404 NOT FOUND` |
-| `POST` | `/journal` | Create a new journal entry for authenticated user | `JournalEntry` (JSON) | `201 CREATED` / `400 BAD REQUEST` |
-| `GET` | `/journal/id/{id}` | Get specific journal entry by ID | *None* | `200 OK` / `404 NOT FOUND` |
-| `PUT` | `/journal/id/{id}` | Update journal entry by ID | `JournalEntry` (JSON) | `200 OK` / `404 NOT FOUND` |
-| `DELETE`| `/journal/id/{id}` | Delete journal entry by ID | *None* | `204 NO CONTENT` / `404 NOT FOUND` |
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/user` | Get authenticated user profile | Yes (HTTP Basic) |
+| `PUT` | `/user` | Update username or password | Yes (HTTP Basic) |
+| `DELETE` | `/user` | Delete authenticated user account | Yes (HTTP Basic) |
 
-#### Create / Update Journal Entry Request Body:
+---
+
+### Journal Entry Endpoints
+
+All journal endpoints require HTTP Basic Authentication and operate strictly on the authenticated user's entries.
+
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/journal` | Get all journal entries for the current user | Yes (HTTP Basic) |
+| `POST` | `/journal` | Create a new journal entry | Yes (HTTP Basic) |
+| `GET` | `/journal/id/{id}` | Get a specific journal entry by ID | Yes (HTTP Basic) |
+| `PUT` | `/journal/id/{id}` | Update a specific journal entry by ID | Yes (HTTP Basic) |
+| `DELETE` | `/journal/id/{id}` | Delete a specific journal entry by ID | Yes (HTTP Basic) |
+
+#### Journal Entry Payload
 ```json
 {
-  "title": "My First Entry",
-  "content": "Today was a productive day building Spring Boot applications!"
+  "title": "Project Update",
+  "content": "Completed Spring Security integration and MongoDB repository layer."
 }
 ```
 
 ---
 
-### 3. User Endpoints (HTTP Basic Auth Required)
+## Configuration
 
-| Method | Endpoint | Description | Request Body | Response Code |
-| :--- | :--- | :--- | :--- | :--- |
-| `PUT` | `/user` | Update authenticated user credentials | `User` (JSON) | `204 NO CONTENT` / `404 NOT FOUND` |
-| `DELETE`| `/user` | Delete authenticated user account | *None* | `204 NO CONTENT` |
-| `GET` | `/user/{userName}`| Get user details by username | *None* | `200 OK` |
-
----
-
-## ⚙️ Configuration & Setup
-
-### Prerequisites
-
-- **Java Development Kit (JDK)**: Version 17 or higher
-- **MongoDB**: Local MongoDB community server (port `27017`) or a free [MongoDB Atlas](https://www.mongodb.com/atlas) cluster
-- **Maven**: 3.8+ (or use the included `./mvnw` wrapper)
-
-### Application Configuration (`src/main/resources/application.properties`)
+The application is configured via `src/main/resources/application.properties`:
 
 ```properties
 spring.application.name=journalApp
 
-# MongoDB Configuration (Local)
+# MongoDB Configuration
 spring.data.mongodb.host=localhost
 spring.data.mongodb.port=27017
 spring.data.mongodb.database=journaldb
 spring.data.mongodb.auto-index-creation=true
 
-# MongoDB URI (Uncomment and configure for MongoDB Atlas / Remote Cluster)
+# MongoDB URI (Uncomment and configure for remote cluster or MongoDB Atlas)
 # spring.data.mongodb.uri=mongodb+srv://<username>:<password>@cluster0.mongodb.net/journaldb?retryWrites=true&w=majority
 spring.data.mongodb.uri=mongodb://localhost:27017/journaldb
 ```
 
 ---
 
-## 🏃 Running the Application
+## Getting Started
 
-1. **Clone the repository**:
+### Prerequisites
+
+- Java 17 or higher
+- MongoDB running locally on port 27017 (or a configured remote MongoDB instance)
+- Maven 3.8+ (or use the included Maven wrapper)
+
+### Build and Run
+
+1. Clone the repository:
    ```bash
    git clone https://github.com/ydv-prince/Journal-App.git
    cd Journal-App
    ```
 
-2. **Ensure MongoDB is running**:
-   - For local MongoDB:
-     ```bash
-     mongod
-     ```
-
-3. **Build the project**:
+2. Compile the project:
    ```bash
    ./mvnw clean compile
    ```
 
-4. **Run the application**:
+3. Run the application:
    ```bash
    ./mvnw spring-boot:run
    ```
-   The application will start on `http://localhost:8080`.
+
+The application runs on `http://localhost:8080` by default.
 
 ---
 
-## 🧪 Sample cURL Commands
+## Example Usage
 
-### 1. Register a new user:
+### 1. Register a user
 ```bash
 curl -X POST http://localhost:8080/public/create-user \
   -H "Content-Type: application/json" \
   -d '{"userName": "prince", "password": "mypassword"}'
 ```
 
-### 2. Create a journal entry:
+### 2. Create a journal entry
 ```bash
 curl -X POST http://localhost:8080/journal \
   -u prince:mypassword \
   -H "Content-Type: application/json" \
-  -d '{"title": "Day 1", "content": "Started learning Spring Boot!"}'
+  -d '{"title": "Day 1", "content": "Set up project architecture and database schemas."}'
 ```
 
-### 3. Get all entries for logged-in user:
+### 3. Fetch journal entries
 ```bash
 curl -X GET http://localhost:8080/journal \
   -u prince:mypassword
 ```
 
-### 4. Update an entry:
+### 4. Update a journal entry
 ```bash
-curl -X PUT http://localhost:8080/journal/id/<ENTRY_OBJECT_ID> \
+curl -X PUT http://localhost:8080/journal/id/<ENTRY_ID> \
   -u prince:mypassword \
   -H "Content-Type: application/json" \
-  -d '{"title": "Day 1 (Updated)", "content": "Mastered Spring Security & MongoDB!"}'
+  -d '{"title": "Day 1 (Updated)", "content": "Added security and transactions."}'
 ```
 
-### 5. Delete an entry:
+### 5. Delete a journal entry
 ```bash
-curl -X DELETE http://localhost:8080/journal/id/<ENTRY_OBJECT_ID> \
+curl -X DELETE http://localhost:8080/journal/id/<ENTRY_ID> \
   -u prince:mypassword
 ```
-
----
-
-## 🔒 Security Highlights
-
-- **Stateless Architecture**: No HTTP session is created (`SessionCreationPolicy.STATELESS`), ensuring API scalability.
-- **CSRF Disabled**: Suitable for stateless REST APIs using HTTP Basic authentication.
-- **BCrypt Hashing**: Passwords are never stored in plain text and are hashed before persisting to MongoDB.
-- **Data Isolation**: Endpoints verify entry ownership against authenticated user context to prevent unauthorized access.
-
----
-
-## 📝 License
-
-This project is licensed under the Apache 2.0 License.
