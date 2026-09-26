@@ -28,16 +28,18 @@ public class UserController {
         return userService.findByUserName(userName);
     }
 
-    @PutMapping()
+    @PutMapping
     public ResponseEntity<?> updateUser(@RequestBody User user){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
         User userInDb = userService.findByUserName(userName);
-
-        userInDb.setUserName(user.getUserName());
-        userInDb.setPassword(user.getPassword());
-        userService.saveEntry(userInDb);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        if (userInDb != null) {
+            userInDb.setUserName(user.getUserName());
+            userInDb.setPassword(user.getPassword());
+            userService.saveNewUser(userInDb);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping
