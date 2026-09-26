@@ -31,10 +31,11 @@ public class JournalEntryController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
         User user = userService.findByUserName(userName);
-        List<JournalEntry> all = user.getJournalEntries();
-
-        if(all != null && !all.isEmpty()){
-            return new ResponseEntity<>(all, HttpStatus.OK);
+        if (user != null) {
+            List<JournalEntry> all = user.getJournalEntries();
+            if (all != null && !all.isEmpty()) {
+                return new ResponseEntity<>(all, HttpStatus.OK);
+            }
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -56,11 +57,13 @@ public class JournalEntryController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
         User user = userService.findByUserName(userName);
-        List<JournalEntry> collect = user.getJournalEntries().stream().filter(x -> x.getId().equals(myId)).collect(Collectors.toList());
-        if(!collect.isEmpty()){
-            Optional<JournalEntry> journalEntry = journalEntryService.findById(myId);
-            if(journalEntry.isPresent()){
-                return new ResponseEntity<>(journalEntry.get(), HttpStatus.OK);
+        if (user != null) {
+            List<JournalEntry> collect = user.getJournalEntries().stream().filter(x -> x.getId().equals(myId)).collect(Collectors.toList());
+            if(!collect.isEmpty()){
+                Optional<JournalEntry> journalEntry = journalEntryService.findById(myId);
+                if(journalEntry.isPresent()){
+                    return new ResponseEntity<>(journalEntry.get(), HttpStatus.OK);
+                }
             }
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -85,14 +88,16 @@ public class JournalEntryController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
         User user = userService.findByUserName(userName);
-        List<JournalEntry> collect = user.getJournalEntries().stream().filter(x -> x.getId().equals(id)).collect(Collectors.toList());
-        if(!collect.isEmpty()){
-            JournalEntry old = journalEntryService.findById(id).orElse(null);
-            if(old != null){
-                old.setTitle(newEntry.getTitle() != null && !newEntry.getTitle().isEmpty() ? newEntry.getTitle() : old.getTitle());
-                old.setContent(newEntry.getContent() != null && !newEntry.getContent().isEmpty() ? newEntry.getContent() : old.getContent());
-                journalEntryService.saveEntry(old);
-                return new ResponseEntity<>(old, HttpStatus.OK);
+        if (user != null) {
+            List<JournalEntry> collect = user.getJournalEntries().stream().filter(x -> x.getId().equals(id)).collect(Collectors.toList());
+            if(!collect.isEmpty()){
+                JournalEntry old = journalEntryService.findById(id).orElse(null);
+                if(old != null){
+                    old.setTitle(newEntry.getTitle() != null && !newEntry.getTitle().isEmpty() ? newEntry.getTitle() : old.getTitle());
+                    old.setContent(newEntry.getContent() != null && !newEntry.getContent().isEmpty() ? newEntry.getContent() : old.getContent());
+                    journalEntryService.saveEntry(old);
+                    return new ResponseEntity<>(old, HttpStatus.OK);
+                }
             }
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
