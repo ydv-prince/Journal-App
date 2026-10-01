@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <meta name="description" content="A simple, secure, and beautiful journaling application.">
+</head>
+<body>
+    <div id="app">
+        <!-- Auth View -->
+        <div id="auth-view" class="view active">
+            <div class="auth-container glass">
+                <div class="auth-header">
+                    <h1>JournalApp</h1>
+                    <p>Your thoughts, secured.</p>
+                </div>
+                <div class="auth-tabs">
+                    <button class="tab-btn active" id="tab-login">Login</button>
+                    <button class="tab-btn" id="tab-register">Register</button>
+                </div>
+                <form id="auth-form">
+                    <div class="input-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" required autocomplete="username">
+                    </div>
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn primary-btn w-100" id="auth-submit-btn">Login</button>
+                    <p id="auth-error" class="error-msg"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="view">
+            <header class="glass-header">
+                <div class="header-content">
+                    <h1>JournalApp</h1>
+                    <div class="user-controls">
+                        <span id="welcome-msg">Welcome!</span>
+                        <button id="logout-btn" class="btn secondary-btn">Logout</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <div class="journal-controls">
+                    <h2>Your Journals</h2>
+                    <button id="new-journal-btn" class="btn primary-btn">+ New Entry</button>
+                </div>
+                
+                <div id="journal-list" class="journal-grid">
+                    <!-- Journal cards injected here -->
+                </div>
+            </main>
+        </div>
+
+        <!-- Modal for New/Edit Journal -->
+        <div id="journal-modal" class="modal">
+            <div class="modal-content glass">
+                <h2 id="modal-title">New Journal Entry</h2>
+                <form id="journal-form">
+                    <input type="hidden" id="journal-id">
+                    <div class="input-group">
+                        <label for="journal-title-input">Title</label>
+                        <input type="text" id="journal-title-input" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="journal-content-input">Content</label>
+                        <textarea id="journal-content-input" rows="6" required></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="cancel-journal-btn" class="btn secondary-btn">Cancel</button>
+                        <button type="submit" class="btn primary-btn" id="save-journal-btn">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/app.js"></script>
+</body>
+</html>
