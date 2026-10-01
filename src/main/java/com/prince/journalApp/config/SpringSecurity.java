@@ -9,20 +9,19 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-
+import org.springframework.security.web.SecurityFilterChain;
 
 import com.prince.journalApp.service.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
-public class SpringSecurity extends WebSecurityConfigurerAdapter{
+public class SpringSecurity {
 
 	@Autowired
 	private UserDetailsServiceImpl userDetailsService;
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception{
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
             .antMatchers("/journal/**", "/user/**")
@@ -34,11 +33,8 @@ public class SpringSecurity extends WebSecurityConfigurerAdapter{
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().csrf().disable();
-	}
-
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception{
-		auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+                
+        return http.build();
 	}
 
 	@Bean

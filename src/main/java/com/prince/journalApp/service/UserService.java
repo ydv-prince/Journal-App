@@ -1,6 +1,8 @@
 package com.prince.journalApp.service;
 
+import com.prince.journalApp.entity.JournalEntry;
 import com.prince.journalApp.entity.User;
+import com.prince.journalApp.repository.JournalEntryRepository;
 import com.prince.journalApp.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -18,6 +20,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JournalEntryRepository journalEntryRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -61,6 +66,12 @@ public class UserService {
     }
 
     public void deleteByUserName(String userName){
-        userRepository.deleteByUserName(userName);
+        User user = userRepository.findByUserName(userName);
+        if (user != null) {
+            for (JournalEntry entry : user.getJournalEntries()) {
+                journalEntryRepository.deleteById(entry.getId());
+            }
+            userRepository.deleteByUserName(userName);
+        }
     }
 }

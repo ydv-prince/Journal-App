@@ -11,6 +11,7 @@ A RESTful backend service for managing personal journal entries, built with Spri
 - **Database Mapping**: MongoDB document persistence using Spring Data MongoDB and `@DBRef` mapping between users and journal entries.
 - **Transaction Support**: Declarative `@Transactional` support with `MongoTransactionManager` for atomic operations across collections.
 - **RESTful Endpoints**: Clean API design for public user registration, user profile management, and journal entry CRUD operations.
+- **Frontend UI**: Integrated a responsive, rich dark-mode UI accessible directly from the root path.
 
 ---
 
@@ -157,6 +158,15 @@ spring.data.mongodb.uri=mongodb://localhost:27017/journaldb
    ```
 
 The application runs on `http://localhost:8080` by default.
+
+### 4. Access the Frontend UI
+
+Once the application is running, open your web browser and navigate to:
+```text
+http://localhost:8080
+```
+This serves the bundled HTML, CSS, and JS frontend application directly, providing a clean and intuitive web interface.
+
 
 ---
 
